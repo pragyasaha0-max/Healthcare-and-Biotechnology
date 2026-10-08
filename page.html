@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="builder">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CV to Portfolio</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+{{THEME_CSS}}
+</style>
+<script>
+{{THEME_JS}}
+</script>
+<style>
+/* ============================================================
+   page layout: only what this page needs on top of the theme
+   ============================================================ */
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+[data-mode="site"] .builder-only{display:none!important}
+.ic{display:inline-block;width:22px;height:22px;flex:none}
+.ic svg{width:100%;height:100%;display:block;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.pg-wrap{width:min(1180px,100% - 48px);margin-inline:auto}
+#fileInput{display:none}
+.pg-g{color:var(--hc-teal)}
+
+/* ---------- builder dock ---------- */
+.pg-dock{position:fixed;right:18px;bottom:18px;z-index:80;display:flex;align-items:center;gap:8px;padding:8px 10px 8px 16px;border-radius:99px;
+  background:#fff;border:1px solid rgba(9,143,161,.4);box-shadow:0 16px 36px -14px rgba(16,42,77,.5);font-size:12.5px;color:var(--hc-soft)}
+.pg-dock .lbl{margin-right:4px}
+
+/* ---------- nav ---------- */
+.pg-nav{position:sticky;top:0;z-index:60;background:rgba(248,252,253,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--hc-line)}
+.pg-nav .pg-wrap{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:72px}
+.pg-logo{display:flex;align-items:center;gap:10px;font:700 21px/1 var(--hc-head);letter-spacing:-.01em;min-width:0;color:var(--hc-ink)}
+.pg-logo .mk{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--hc-grad);color:#fff;flex:none}
+.pg-logo .mk .ic{width:20px;height:20px;stroke-width:2.4}
+.pg-logo span.nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pg-links{display:flex;gap:34px}
+.pg-links a{position:relative;font-size:13.5px;font-weight:500;padding:26px 0;color:var(--hc-ink);transition:color .25s}
+.pg-links a::after{content:"";position:absolute;left:0;right:0;bottom:18px;height:2px;border-radius:2px;background:var(--hc-teal);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.pg-links a:hover,.pg-links a.is-on{color:var(--hc-teal)}
+.pg-links a:hover::after,.pg-links a.is-on::after{transform:scaleX(1)}
+.pg-navr{justify-self:end;display:flex;align-items:center;gap:14px}
+.pg-navr .srch{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--hc-ink);transition:background .25s,color .25s}
+.pg-navr .srch:hover{background:rgba(9,143,161,.12);color:var(--hc-teal)}
+.pg-navr .srch .ic{width:18px;height:18px}
+
+/* ---------- hero ---------- */
+.pg-hero{position:relative;min-height:clamp(470px,40vw,590px);display:flex;align-items:center;overflow:hidden;
+  background:linear-gradient(100deg,#f4fafd 0,#e6f2fa 55%,#d9ebf7 100%)}
+.pg-himg{position:absolute;top:0;right:0;bottom:0;width:72%;z-index:0;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 24%,#000 80%,transparent);mask-image:linear-gradient(90deg,transparent,#000 24%,#000 80%,transparent)}
+.pg-himg img{width:100%;height:100%;object-fit:cover;object-position:right center;display:block;transform-origin:70% 40%;animation:pg-kb 18s ease-in-out infinite alternate}
+@keyframes pg-kb{to{transform:scale(1.07)}}
+.pg-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:90px;z-index:1;pointer-events:none;background:linear-gradient(transparent,var(--hc-bg))}
+.pg-hero .pg-wrap{position:relative;z-index:2;padding:56px 0 64px}
+.pg-kick{font-size:12px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--hc-teal);margin-bottom:18px}
+.pg-hero h1{font:700 clamp(34px,4.3vw,58px)/1.1 var(--hc-head);letter-spacing:-.025em;max-width:640px;margin-bottom:20px;color:var(--hc-ink)}
+.pg-hero p.sum{max-width:460px;font-size:15.5px;line-height:1.65;color:#40597a;margin-bottom:28px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.pg-cta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:30px}
+.pg-cta .hc-btn{padding:14px 28px}
+.pg-exp{display:inline-flex;align-items:center;gap:14px}
+.pg-exp .ring{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--hc-teal);box-shadow:0 8px 18px -10px rgba(16,42,77,.5)}
+.pg-exp b{font:700 26px/1 var(--hc-head);color:var(--hc-ink);font-variant-numeric:tabular-nums}
+.pg-exp small{display:block;font-size:12.5px;color:var(--hc-soft);margin-top:3px}
+
+/* floating skill card over the photo */
+.pg-float{position:absolute;z-index:3;right:max(24px,calc((100% - 1180px)/2));top:50%;width:230px;margin-top:-120px;padding:18px 18px 12px;border-radius:16px;
+  background:rgba(255,255,255,.82);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);animation:pg-bob 6s ease-in-out infinite}
+@keyframes pg-bob{50%{transform:translateY(-8px)}}
+.pg-float h4{font:600 12px var(--hc-head);letter-spacing:.14em;text-transform:uppercase;color:var(--hc-soft);margin:0 0 10px}
+.pg-float li{list-style:none;display:flex;align-items:center;gap:11px;padding:9px 0;font-size:13.5px;font-weight:500;border-top:1px solid var(--hc-line);transition:color .25s,transform .25s}
+.pg-float li:first-of-type{border-top:0}
+.pg-float li:hover{color:var(--hc-teal);transform:translateX(4px)}
+.pg-float li .ic{width:30px;height:30px;padding:6px;border-radius:9px;background:rgba(9,143,161,.12);color:var(--hc-teal)}
+.pg-float ul{margin:0;padding:0}
+
+/* ---------- profile strip ---------- */
+.pg-prof{position:relative;z-index:3;margin-top:-34px;display:grid;grid-template-columns:repeat(5,1fr);padding:6px 0;border-radius:16px}
+.pg-pi{display:flex;align-items:center;gap:13px;padding:20px 20px;position:relative;min-width:0;transition:background .3s}
+.pg-pi+.pg-pi::before{content:"";position:absolute;left:0;top:24%;bottom:24%;width:1px;background:var(--hc-line)}
+.pg-pi .ic{width:42px;height:42px;padding:10px;border-radius:12px;background:rgba(9,143,161,.12);color:var(--hc-teal);transition:transform .35s,background .25s,color .25s}
+.pg-pi:hover .ic{transform:translateY(-4px) rotate(-6deg);background:var(--hc-teal);color:#fff}
+.pg-pi div{min-width:0}
+.pg-pi small{display:block;font-size:11.5px;color:var(--hc-soft);margin-bottom:2px}
+.pg-pi b{display:block;font-size:13.5px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---------- section headings ---------- */
+.pg-sec{padding:78px 0 0}
+.pg-eyebrow{font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--hc-teal);margin-bottom:10px}
+.pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:30px}
+.pg-head h2,.pg-h2{font:700 clamp(26px,2.9vw,36px)/1.2 var(--hc-head);letter-spacing:-.02em}
+.pg-more{display:inline-flex;align-items:center;gap:8px;font:600 13px var(--hc-sans);color:var(--hc-teal);background:none;border:0;cursor:pointer;padding:6px 0;transition:gap .2s}
+.pg-more:hover{gap:13px}
+.pg-more .ic{width:15px;height:15px}
+.pg-more[hidden]{display:none}
+
+/* ---------- project cards ---------- */
+.pg-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.pg-card{display:flex;flex-direction:column;border-radius:16px;background:#fff;border:1px solid var(--hc-line);overflow:hidden;
+  transition:transform .3s,box-shadow .3s}
+.pg-card:hover{box-shadow:var(--hc-shadow)}
+.pg-ph{position:relative;aspect-ratio:294/160;overflow:hidden;background:#cfe6f1;border-radius:15px 15px 0 0}
+.pg-ph img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.02);transition:transform .8s ease}
+.pg-card:hover .pg-ph img{transform:scale(1.12)}
+.pg-card .body{padding:20px 22px 22px;display:grid;grid-template-columns:1fr auto;column-gap:14px;row-gap:6px;flex:1;align-items:end}
+.pg-card h3{grid-column:1/2;font:600 17px/1.3 var(--hc-head);transition:color .25s}
+.pg-card:hover h3{color:var(--hc-teal)}
+.pg-card p{grid-column:1/2;font-size:13px;line-height:1.55;color:var(--hc-soft);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.pg-go{grid-column:2/3;grid-row:1/3;align-self:center;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--hc-teal);border:1.5px solid rgba(9,143,161,.4);transition:background .25s,color .25s,transform .3s}
+.pg-go .ic{width:16px;height:16px}
+.pg-card:hover .pg-go{background:var(--hc-teal);color:#fff;transform:translateX(4px)}
+.pg-cards .extra{display:none}
+.pg-cards.is-open .extra{display:flex}
+.pg-empty{font-size:13.5px;color:var(--hc-soft)}
+
+/* ---------- stats bar ---------- */
+.pg-bar{margin-top:78px;border-radius:18px;background:var(--hc-grad);color:#fff;display:grid;grid-template-columns:repeat(5,1fr);padding:10px 0;box-shadow:0 22px 40px -22px rgba(9,102,176,.8)}
+.pg-stat{display:flex;align-items:center;justify-content:center;gap:14px;padding:26px 10px;position:relative;transition:background .3s}
+.pg-stat+.pg-stat::before{content:"";position:absolute;left:0;top:24%;bottom:24%;width:1px;background:rgba(255,255,255,.28)}
+.pg-stat .ic{width:36px;height:36px;color:#d7fff2;transition:transform .35s}
+.pg-stat:hover .ic{transform:translateY(-4px) scale(1.12)}
+.pg-stat b{display:block;font:700 32px/1.05 var(--hc-head);font-variant-numeric:tabular-nums}
+.pg-stat small{display:block;font-size:12.5px;opacity:.9;margin-top:3px}
+.pg-bar{border:0}
+
+/* ---------- experience / R&D style block ---------- */
+.pg-split{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center}
+.pg-photo{position:relative;border-radius:18px;aspect-ratio:916/372;overflow:visible}
+.pg-photo img{width:100%;height:100%;object-fit:cover;display:block;border-radius:18px;transition:transform .8s ease}
+.pg-photo .clip{position:absolute;inset:0;border-radius:18px;overflow:hidden}
+.pg-photo:hover img{transform:scale(1.05)}
+.pg-tag{position:absolute;left:18px;bottom:-22px;z-index:3;display:flex;align-items:center;gap:12px;padding:12px 18px;border-radius:14px;background:#fff;box-shadow:0 16px 30px -14px rgba(16,42,77,.5);font-size:13px;color:var(--hc-soft)}
+.pg-tag b{display:block;font-size:14px;color:var(--hc-ink)}
+.pg-tag .ic{width:38px;height:38px;padding:9px;border-radius:50%;background:rgba(9,143,161,.12);color:var(--hc-teal)}
+.pg-h2+.pg-sum{margin-top:16px}
+.pg-sum{font-size:15px;line-height:1.7;color:#40597a;margin:14px 0 22px;max-width:520px}
+.pg-checks{margin:0 0 26px;padding:0;list-style:none;display:grid;gap:14px}
+.pg-checks li{display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:start;transition:transform .25s}
+.pg-checks li:hover{transform:translateX(5px)}
+.pg-checks .ck{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--hc-teal);color:#fff;margin-top:2px;transition:box-shadow .3s}
+.pg-checks .ck .ic{width:14px;height:14px;stroke-width:2.6}
+.pg-checks li:hover .ck{box-shadow:0 0 0 6px rgba(9,143,161,.18)}
+.pg-checks b{display:block;font-size:15px;font-weight:600;transition:color .25s}
+.pg-checks li:hover b{color:var(--hc-teal)}
+.pg-checks small{display:block;font-size:12.5px;color:var(--hc-soft);line-height:1.55;margin-top:1px}
+
+/* education */
+.pg-edus{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:64px}
+.pg-edu{display:grid;grid-template-columns:48px 1fr;gap:14px;align-items:start;padding:22px;border-radius:16px;background:#fff}
+.pg-edu .badge{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:rgba(9,143,161,.12);color:var(--hc-teal);transition:transform .35s,background .25s,color .25s}
+.pg-edu:hover .badge{transform:rotate(-8deg);background:var(--hc-teal);color:#fff}
+.pg-edu b{display:block;font-size:15px;font-weight:600;margin-bottom:3px}
+.pg-edu small{display:block;font-size:12.5px;line-height:1.55;color:var(--hc-soft)}
+.pg-certs{margin-top:22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pg-certs .pg-eyebrow{margin:0}
+
+/* ---------- skills + map ---------- */
+.pg-world{display:grid;grid-template-columns:1fr 1.1fr;gap:48px;align-items:center}
+.pg-feats{display:grid;gap:16px;margin:24px 0 20px}
+.pg-feat{display:grid;grid-template-columns:48px 1fr;gap:16px;align-items:center;padding:14px 18px;border-radius:14px;background:#fff;transition:transform .3s}
+.pg-feat:hover{transform:translateX(6px)}
+.pg-feat .ic{width:48px;height:48px;padding:12px;border-radius:50%;background:rgba(9,143,161,.12);color:var(--hc-teal);transition:background .25s,color .25s,transform .35s}
+.pg-feat:hover .ic{background:var(--hc-teal);color:#fff;transform:rotate(-8deg) scale(1.06)}
+.pg-feat b{font-size:15px;font-weight:600}
+.pg-map{position:relative;border-radius:18px;background:#fff;padding:14px;aspect-ratio:852/260}
+.pg-map .in{position:relative;width:100%;height:100%;border-radius:12px;overflow:hidden}
+.pg-map img{width:100%;height:100%;object-fit:cover;display:block}
+.pg-map .hc-pin{--hc-d:0s}
+
+/* ---------- call to action ---------- */
+.pg-cta2{margin-top:84px;border-radius:20px;background:var(--hc-grad-cta);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;padding:40px 48px;overflow:hidden}
+.pg-cta2 h2{font:700 clamp(24px,2.8vw,34px)/1.2 var(--hc-head);letter-spacing:-.02em;margin-bottom:6px}
+.pg-cta2 p{font-size:14.5px;opacity:.92}
+
+/* ---------- footer ---------- */
+.pg-foot{margin-top:80px;background:#fff;border-top:1px solid var(--hc-line);padding:54px 0 28px}
+.pg-fgrid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.3fr;gap:36px}
+.pg-foot p.d{font-size:13px;line-height:1.65;color:var(--hc-soft);margin-top:14px;max-width:300px}
+.pg-foot h5{margin:0 0 14px;font:600 13px var(--hc-head);letter-spacing:.12em;text-transform:uppercase;color:var(--hc-ink)}
+.pg-foot ul{margin:0;padding:0;list-style:none;display:grid;gap:9px}
+.pg-foot li,.pg-foot li a{font-size:13.5px;color:var(--hc-soft);transition:color .2s}
+.pg-foot li a:hover{color:var(--hc-teal)}
+.pg-foot .bt{margin-top:40px;padding-top:20px;border-top:1px solid var(--hc-line);font-size:12.5px;color:var(--hc-soft);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pg-foot a[hidden],.pg-foot li[hidden]{display:none}
+
+/* ---------- progress modal + drop overlay (builder only) ---------- */
+.pg-modal{position:fixed;inset:0;z-index:100;display:none;place-items:center;background:rgba(16,42,77,.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.pg-modal.on{display:grid}
+.pg-modal .box{width:min(380px,90vw);text-align:center;padding:30px}
+.pg-ring{position:relative;width:96px;height:96px;margin:0 auto 14px}
+.pg-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.pg-ring circle{fill:none;stroke-width:5}
+.pg-ring .bg{stroke:var(--hc-line)}
+.pg-ring .arc{stroke:var(--hc-teal);stroke-linecap:round;stroke-dasharray:226.2;stroke-dashoffset:226.2;transition:stroke-dashoffset .5s ease}
+.pg-ring b{position:absolute;inset:0;display:grid;place-items:center;font:600 20px var(--hc-head)}
+.pg-steps{list-style:none;margin:14px 0 0;padding:0;text-align:left;display:inline-block}
+.pg-steps li{position:relative;padding:5px 0 5px 24px;font-size:13px;color:var(--hc-soft)}
+.pg-steps li::before{content:"";position:absolute;left:0;top:9px;width:11px;height:11px;border-radius:50%;border:2px solid var(--hc-line)}
+.pg-steps li.done{color:var(--hc-ink)}
+.pg-steps li.done::before{background:var(--hc-teal);border-color:var(--hc-teal)}
+.pg-steps li.now::before{border-color:var(--hc-teal);animation:pg-beat 1s ease-in-out infinite}
+@keyframes pg-beat{50%{box-shadow:0 0 0 5px rgba(9,143,161,.25)}}
+.pg-err{color:#c0392b;font-size:13px;margin-top:8px;min-height:18px}
+.pg-drop{position:fixed;inset:14px;z-index:90;display:none;place-items:center;border:2px dashed var(--hc-teal);border-radius:22px;background:rgba(237,246,252,.94);font:600 26px var(--hc-head);pointer-events:none}
+.pg-drop.on{display:grid}
+
+/* ---------- smaller screens ---------- */
+@media (max-width:1040px){
+  .pg-links{display:none}
+  .pg-nav .pg-wrap{grid-template-columns:1fr auto}
+  .pg-float{display:none}
+  .pg-himg{width:100%;opacity:.55}
+  .pg-prof{grid-template-columns:1fr 1fr}
+  .pg-pi:nth-child(3)::before{display:none}
+  .pg-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pg-bar{grid-template-columns:repeat(3,1fr)}
+  .pg-stat:nth-child(4)::before{display:none}
+  .pg-split,.pg-world{grid-template-columns:1fr;gap:44px}
+  .pg-fgrid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:600px){
+  .pg-cards{grid-template-columns:1fr}
+  .pg-prof,.pg-bar{grid-template-columns:1fr 1fr}
+  .pg-pi::before,.pg-stat::before{display:none!important}
+  .pg-cta2{padding:30px 24px}
+  .pg-dock .lbl{display:none}
+  .pg-fgrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body class="hc" data-hc-bg>
+
+<!-- builder-only dock: hidden in the downloaded site -->
+<div class="pg-dock builder-only">
+  <span class="lbl">CV builder</span>
+  <button class="hc-btn hc-btn-solid hc-btn-sm" id="barUpload" type="button">Upload CV</button>
+  <button class="hc-btn hc-btn-line hc-btn-sm" id="siteBtn" type="button" hidden>Download site</button>
+  <input type="file" id="fileInput" accept="application/pdf,.pdf">
+</div>
+
+<header class="pg-nav">
+  <div class="pg-wrap">
+    <a class="pg-logo" href="#top"><span class="mk"><span class="ic" data-ic="cross"></span></span><span class="nm" id="brand">Name</span></a>
+    <nav class="pg-links" id="nav">
+      <a class="is-on" href="#top">Home</a><a href="#about">About</a><a href="#projects">Projects</a><a href="#experience">Experience</a><a href="#skills">Skills</a><a href="#contact">Contact</a>
+    </nav>
+    <div class="pg-navr">
+      <a class="srch" href="#skills" aria-label="Skills"><span class="ic" data-ic="search"></span></a>
+      <a class="hc-btn hc-btn-solid hc-btn-sm" id="navCta" href="#contact">Contact Me</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- ============ hero ============ -->
+  <section class="pg-hero" id="top">
+    <div class="pg-himg"><img id="heroImg" alt="" src="{{HERO}}"></div>
+    <div class="pg-wrap">
+      <div class="pg-kick hc-reveal" id="kick">Pune, India · Portfolio</div>
+      <h1 id="heroTitle" data-hc-words>Hi, I’m Name <br><span class="hc-wipe pg-g">Healthcare Product Designer</span></h1>
+      <p class="sum hc-reveal" id="heroSum"></p>
+      <div class="pg-cta hc-reveal">
+        <button class="hc-btn hc-btn-solid" id="resumeBtn" type="button"><span id="resumeTxt">Upload CV</span> <span class="ic" data-ic="arrow" style="width:16px;height:16px"></span></button>
+        <a class="hc-btn hc-btn-line" id="contactBtn" href="#contact">Get in touch</a>
+      </div>
+      <div class="pg-exp hc-reveal">
+        <span class="ring"><span class="ic" data-ic="award"></span></span>
+        <div><b id="hYears" data-hc-count="3" data-hc-suffix="+">0</b><small>Years of experience</small></div>
+      </div>
+    </div>
+    <aside class="pg-float hc-card hc-glow hc-reveal">
+      <h4>Top skills</h4>
+      <ul id="floatList"></ul>
+    </aside>
+  </section>
+
+  <div class="pg-wrap">
+    <!-- ============ profile strip ============ -->
+    <div class="pg-prof hc-card hc-glow hc-reveal" id="about" data-hc-relay="2600"></div>
+
+    <!-- ============ projects ============ -->
+    <section class="pg-sec" id="projects">
+      <div class="pg-head">
+        <div><div class="pg-eyebrow hc-reveal">Selected work</div><h2 data-hc-words>Projects that move care forward</h2></div>
+        <button class="pg-more" id="moreProj" type="button" hidden><span>View all projects</span> <span class="ic" data-ic="arrow"></span></button>
+      </div>
+      <div class="pg-cards hc-stagger" id="cards" data-hc-relay="2800"></div>
+    </section>
+
+    <!-- ============ stats ============ -->
+    <div class="pg-bar hc-glow hc-glow-w hc-reveal" data-hc-relay="3000">
+      <div class="pg-stat"><span class="ic" data-ic="clock"></span><div><b id="sYears" data-hc-count="3" data-hc-suffix="+">0</b><small>Years of Experience</small></div></div>
+      <div class="pg-stat"><span class="ic" data-ic="flask"></span><div><b id="sProj" data-hc-count="4" data-hc-suffix="+">0</b><small>Projects</small></div></div>
+      <div class="pg-stat"><span class="ic" data-ic="layers"></span><div><b id="sSkill" data-hc-count="8">0</b><small>Skills</small></div></div>
+      <div class="pg-stat"><span class="ic" data-ic="cap"></span><div><b id="sEdu" data-hc-count="2">0</b><small>Education</small></div></div>
+      <div class="pg-stat"><span class="ic" data-ic="award"></span><div><b id="sCert" data-hc-count="1">0</b><small>Certifications</small></div></div>
+    </div>
+
+    <!-- ============ experience ============ -->
+    <section class="pg-sec" id="experience">
+      <div class="pg-split">
+        <div class="pg-photo hc-glow hc-reveal">
+          <div class="clip"><img id="labImg" alt="" src="{{LAB}}"></div>
+          <div class="pg-tag"><span class="ic" data-ic="flask"></span><div><b id="tagTop">Healthcare Product Designer</b><span id="tagSub">Current role</span></div></div>
+        </div>
+        <div>
+          <div class="pg-eyebrow hc-reveal">Experience</div>
+          <h2 class="pg-h2" data-hc-words id="expTitle">Where I have worked</h2>
+          <p class="pg-sum hc-reveal" id="aboutText"></p>
+          <ul class="pg-checks hc-stagger" id="jobList"></ul>
+          <a class="hc-btn hc-btn-solid hc-reveal" id="aboutBtn" href="#contact">Learn more <span class="ic" data-ic="arrow" style="width:16px;height:16px"></span></a>
+        </div>
+      </div>
+      <div class="pg-edus hc-stagger" id="eduList"></div>
+      <div class="pg-certs" id="certBox" hidden><div class="pg-eyebrow">Certifications</div><div class="hc-chips" id="certList"></div></div>
+    </section>
+
+    <!-- ============ skills ============ -->
+    <section class="pg-sec" id="skills">
+      <div class="pg-world">
+        <div>
+          <div class="pg-eyebrow hc-reveal">Skills</div>
+          <h2 class="pg-h2" data-hc-words>Tools and strengths I bring</h2>
+          <div class="pg-feats hc-stagger" id="strip"></div>
+          <div class="hc-chips" id="moreSkills"></div>
+        </div>
+        <div class="pg-map hc-card hc-glow hc-reveal">
+          <div class="in"><img alt="" src="{{MAP}}">
+            <i class="hc-pin" style="left:22.3%;top:64.4%"></i><i class="hc-pin" style="left:48.4%;top:42.4%;--hc-d:.5s"></i>
+            <i class="hc-pin" style="left:80.2%;top:51.7%;--hc-d:1s"></i><i class="hc-pin" style="left:74.6%;top:78%;--hc-d:1.5s"></i>
+            <i class="hc-pin" style="left:24%;top:33%;--hc-d:2s"></i></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ call to action ============ -->
+    <section class="pg-cta2 hc-glow hc-glow-w hc-reveal" id="contact">
+      <div><h2 id="ctaTitle">Let’s work together</h2><p id="ctaSub">Open to new roles and collaborations in healthcare and life sciences.</p></div>
+      <a class="hc-btn hc-btn-white" id="ctaBtn" href="#top">Contact Me <span class="ic" data-ic="arrow" style="width:16px;height:16px"></span></a>
+    </section>
+  </div>
+</main>
+
+<footer class="pg-foot">
+  <div class="pg-wrap">
+    <div class="pg-fgrid">
+      <div><a class="pg-logo" href="#top"><span class="mk"><span class="ic" data-ic="cross"></span></span><span class="nm" id="footBrand">Name</span></a><p class="d" id="footAbout"></p></div>
+      <div><h5>Explore</h5><ul><li><a href="#about">About</a></li><li><a href="#projects">Projects</a></li><li><a href="#experience">Experience</a></li><li><a href="#skills">Skills</a></li></ul></div>
+      <div><h5>Top skills</h5><ul id="footSkills"></ul></div>
+      <div><h5>Contact</h5><ul>
+        <li id="fLoc"></li>
+        <li id="fMailLi" hidden><a id="mailLink" href="#top"></a></li>
+        <li id="fInLi" hidden><a id="inLink" href="#top">LinkedIn</a></li>
+        <li id="fCvLi" hidden><a id="cvLink" href="#top">Download CV</a></li></ul></div>
+    </div>
+    <div class="bt"><span id="footName">&copy; 2026 Name</span><span>Built from a CV</span></div>
+  </div>
+</footer>
+
+<!-- progress while a CV is being read (builder only) -->
+<div class="pg-modal builder-only" id="modal" role="dialog" aria-live="polite">
+  <div class="hc-card box">
+    <div class="pg-ring"><svg viewBox="0 0 80 80"><circle class="bg" cx="40" cy="40" r="36"/><circle class="arc" id="arc" cx="40" cy="40" r="36"/></svg><b id="pct">0%</b></div>
+    <h3 id="modalTitle" style="margin:0">Reading the CV</h3>
+    <ul class="pg-steps" id="steps"><li>Extracting experience</li><li>Picking out skills</li><li>Finding projects</li><li>Building the page</li></ul>
+    <div class="pg-err" id="err"></div>
+    <button class="hc-btn hc-btn-line hc-btn-sm" id="modalClose" type="button" hidden style="margin-top:8px">Close</button>
+  </div>
+</div>
+<div class="pg-drop builder-only" id="dropzone">Drop the CV to build the page</div>
+
+<script>
+{{HELPERS}}
+
+/* ============================================================
+   page script: CV in, portfolio out
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const ARC = 226.2;                  // circumference of the r=36 progress ring
+const NOW_YEAR = new Date().getFullYear();
+let CURRENT = null;                 // set once a real CV has been processed
+
+/* the six therapeutic-area photos cut from the design (project cards cycle through them) */
+const PHOTOS = ['{{A1}}', '{{A2}}', '{{A3}}', '{{A4}}', '{{A5}}', '{{A6}}'];
+
+/* fictional CV shown before anything is uploaded; it goes through the same parser as a real PDF */
+const SAMPLE = [
+  'Name', 'Healthcare Product Designer', 'Pune, India', 'name@example.com', 'linkedin.com/in/name',
+  'Summary',
+  'Product designer focused on clinical software, patient apps and care dashboards. I turn complex medical workflows into interfaces that clinicians can trust and patients can follow.',
+  'Experience',
+  'Senior Product Designer, MedBridge Health', 'Jul 2022 - Present',
+  '• Led the redesign of a cardiac monitoring app used across fourteen hospitals.',
+  '• Cut clinician onboarding time by 40% with a new design system.',
+  'Product Designer, CareLoop Digital', 'Jan 2021 - Jun 2022',
+  '• Designed a remote patient-monitoring portal from research to launch.',
+  'UX Research Intern, Lumen Biotech', 'May 2020 - Dec 2020',
+  '• Ran usability studies with nurses and lab technicians.',
+  'Education',
+  'Master of Design (Interaction), Riverside Institute of Design', '2018 - 2020',
+  'Bachelor of Engineering, Bay City College', '2014 - 2018',
+  'Projects',
+  'Cardiac Monitoring App', 'Real-time heart data for patients and care teams, with alerts that stay calm and clear.',
+  'Oncology Care Dashboard', 'A single view of treatment plans, lab results and appointments for oncology nurses.',
+  'Neurology Triage Tool', 'Guided intake that helps neurology teams sort urgent cases faster.',
+  'Diabetes Tracker', 'Glucose, meals and medication in one patient app with gentle daily nudges.',
+  'Respiratory Care Portal', 'Home-monitoring portal for patients managing chronic breathing conditions.',
+  'Infection Control Dashboard', 'Ward-level tracking of infection signals so teams can act early.',
+  'Skills',
+  'Figma, Design Systems, User Research, Prototyping, Accessibility, Clinical Workflows, Data Visualisation, Usability Testing',
+  'Certifications',
+  'HFES Human Factors Certificate'
+];
+
+/* ---------- icons: 24px line icons, filled in wherever an element has data-ic ---------- */
+const PATHS = {
+  arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  cross:'<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>',
+  search:'<circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/>',
+  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  clock:'<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>',
+  cap:'<path d="M2 9l10-5 10 5-10 5zM6 11.5V16c0 1.5 3 3 6 3s6-1.5 6-3v-4.5"/>',
+  bank:'<path d="M3 10l9-6 9 6M5 10v8M9 10v8M15 10v8M19 10v8M3 20h18"/>',
+  user:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/>',
+  award:'<circle cx="12" cy="9" r="5.5"/><path d="M8.5 13.5L7 21l5-3 5 3-1.5-7.5"/>',
+  layers:'<path d="M12 3l9 5-9 5-9-5zM3 13l9 5 9-5"/>',
+  flask:'<path d="M9 3h6M10 3v6l-5.5 9.5A1.5 1.5 0 005.8 21h12.4a1.5 1.5 0 001.3-2.5L14 9V3M7.5 15h9"/>',
+  pin:'<path d="M12 21c-4-4.5-6-7.5-6-10.5a6 6 0 0112 0c0 3-2 6-6 10.5z"/><circle cx="12" cy="10.5" r="2.2"/>',
+  check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  heart:'<path d="M12 20s-8-4.7-8-10.3A4.7 4.7 0 0112 7a4.7 4.7 0 018 2.7C20 15.3 12 20 12 20z"/>',
+  pulse:'<path d="M3 12h4l2-6 4 12 2-6h6"/>',
+  dna:'<path d="M7 3c0 6 10 6 10 12s-10 6-10 6M17 3c0 6-10 6-10 12M8 7h8M8 17h8"/>',
+  shield:'<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
+  pill:'<rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-35 12 12)"/><path d="M9.5 8.5l6 6"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/>',
+  download:'<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>'
+};
+const svgIcon = name => '<svg viewBox="0 0 24 24" aria-hidden="true">' + (PATHS[name] || '') + '</svg>';
+function paintIcons(root){ (root || document).querySelectorAll('[data-ic]').forEach(el => { el.innerHTML = svgIcon(el.dataset.ic); }); }
+const SKILL_ICONS = ['pulse', 'dna', 'shield', 'gear', 'heart', 'layers', 'pill', 'flask'];
+
+/* ---------- small helpers ---------- */
+function yearsLabel(y){ return y >= 1 ? {n: Math.floor(y), s: '+'} : {n: Math.round(y * 10) / 10, s: ''}; }
+function setCount(id, n, suffix){ const el = $(id); el.textContent = '0'; HC.count(el, n, suffix || ''); }
+function setHeading(el, html){
+  el.innerHTML = html;
+  delete el.dataset.hcSplit;
+  el.classList.remove('is-in');
+  HC.refresh();
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('is-in')));
+}
+function lastYear(dates){
+  if(/present|current/i.test(dates || '')) return NOW_YEAR;
+  const m = (dates || '').match(/\d{4}/g);
+  return m ? parseInt(m[m.length - 1], 10) : 0;
+}
+const NOT_LISTED = 'Not listed';
+
+/* ============================================================
+   render
+   ============================================================ */
+function renderProfile(p, opts){
+  opts = opts || {};
+  const real = !opts.preview;
+  if(real) CURRENT = p;
+  const y = yearsLabel(computeYearsOfExperience(p.experience));
+  const name = p.name || 'Name';
+  const role = p.headline || (p.experience[0] && p.experience[0].title) || 'Healthcare Professional';
+
+  /* numbers */
+  setCount('hYears', y.n, y.s);
+  setCount('sYears', y.n, y.s);
+  setCount('sProj', p.projects.length, '+');
+  setCount('sSkill', p.skills.length);
+  setCount('sEdu', p.education.length);
+  setCount('sCert', p.certifications.length);
+
+  /* hero */
+  $('brand').textContent = name;
+  $('footBrand').textContent = name;
+  $('kick').textContent = [p.location, 'Portfolio'].filter(Boolean).join(' · ');
+  setHeading($('heroTitle'), 'Hi, I’m ' + escapeHtml(name) + ' <br><span class="hc-wipe pg-g">' + escapeHtml(role) + '</span>');
+  $('heroSum').textContent = p.summary;
+  $('aboutText').textContent = p.summary;
+  $('footAbout').textContent = role;
+  $('footName').textContent = '© ' + NOW_YEAR + ' ' + name;
+  $('tagTop').textContent = (p.experience[0] && p.experience[0].title) || role;
+  $('tagSub').textContent = (p.experience[0] && p.experience[0].company) || 'Current role';
+  $('floatList').innerHTML = p.skills.length ? p.skills.slice(0, 4).map((s, i) =>
+    '<li><span class="ic">' + svgIcon(SKILL_ICONS[i]) + '</span>' + escapeHtml(s) + '</li>').join('')
+    : '<li>' + NOT_LISTED + '</li>';
+
+  /* profile strip: five facts straight from the CV */
+  const e0 = p.experience[0], d0 = p.education[0];
+  const facts = [
+    ['user', 'Current role', e0 ? e0.title : NOT_LISTED],
+    ['cap', 'Education', d0 ? d0.degree : NOT_LISTED],
+    ['layers', 'Key skills', p.skills.length ? p.skills.slice(0, 2).join(', ') : NOT_LISTED],
+    ['award', 'Certifications', p.certifications.length ? p.certifications[0] : NOT_LISTED],
+    ['pin', 'Based in', p.location || NOT_LISTED]
+  ];
+  $('about').innerHTML = facts.map(f => '<div class="pg-pi"><span class="ic">' + svgIcon(f[0]) + '</span><div><small>' + f[1] + '</small><b title="' + escapeHtml(f[2]) + '">' + escapeHtml(f[2]) + '</b></div></div>').join('');
+
+  /* project cards: photos from the design, cycled */
+  $('cards').innerHTML = p.projects.length ? p.projects.map((pr, i) =>
+    '<article class="pg-card hc-glow' + (i >= 6 ? ' extra' : '') + '"><div class="pg-ph"><img alt="" src="' + PHOTOS[i % 6] + '"></div>' +
+    '<div class="body"><h3>' + escapeHtml(pr.title) + '</h3><p>' + escapeHtml(pr.description || '') + '</p>' +
+    '<a class="pg-go" href="#experience" aria-label="Details"><span class="ic">' + svgIcon('arrow') + '</span></a></div></article>').join('')
+    : '<div class="pg-empty">No Projects section was found in this CV.</div>';
+  $('moreProj').hidden = p.projects.length <= 6;
+
+  /* experience checklist: role, company and dates, first bullet underneath */
+  $('jobList').innerHTML = p.experience.length ? p.experience.slice(0, 4).map(e =>
+    '<li><span class="ck"><span class="ic">' + svgIcon('check') + '</span></span><div><b>' + escapeHtml(e.title) + '</b><small>' +
+    escapeHtml([e.company, (e.dates || '').replace(/\s*-\s*/, ' – ')].filter(Boolean).join('  |  ')) + '</small>' +
+    (e.points && e.points[0] ? '<small>' + escapeHtml(e.points[0]) + '</small>' : '') + '</div></li>').join('')
+    : '<li class="pg-empty">No Experience section was found in this CV.</li>';
+
+  /* education + certifications */
+  $('eduList').innerHTML = p.education.length ? p.education.map((e, i) => {
+    const status = lastYear(e.dates) >= NOW_YEAR ? 'Pursuing' : 'Completed';
+    const when = (e.dates || '').replace(/\s*-\s*/, ' – ');
+    return '<div class="pg-edu hc-card hc-glow"><span class="badge"><span class="ic">' + svgIcon(i % 2 ? 'bank' : 'cap') + '</span></span><div><b>' + escapeHtml(e.degree) + '</b><small>' +
+      (when ? status + ' | ' + escapeHtml(when) + '<br>' : '') + escapeHtml(e.school || '') + '</small></div></div>';
+  }).join('') : '<div class="pg-empty">No Education section was found in this CV.</div>';
+  $('certBox').hidden = !p.certifications.length;
+  $('certList').innerHTML = p.certifications.slice(0, 4).map(c => '<span class="hc-chip">' + escapeHtml(c) + '</span>').join('');
+
+  /* skills: first three as feature rows, the rest as chips */
+  $('strip').innerHTML = p.skills.length ? p.skills.slice(0, 3).map((s, i) =>
+    '<div class="pg-feat hc-glow"><span class="ic">' + svgIcon(SKILL_ICONS[(i + 4) % 8]) + '</span><b>' + escapeHtml(s) + '</b></div>').join('')
+    : '<div class="pg-empty">No Skills section was found in this CV.</div>';
+  $('moreSkills').innerHTML = p.skills.slice(3).map(s => '<span class="hc-chip">' + escapeHtml(s) + '</span>').join('');
+  $('footSkills').innerHTML = p.skills.slice(0, 4).map(s => '<li>' + escapeHtml(s) + '</li>').join('') || '<li>' + NOT_LISTED + '</li>';
+
+  /* contact */
+  $('fLoc').textContent = p.location || '';
+  $('fLoc').hidden = !p.location;
+  if(real){
+    document.title = name + ' | Portfolio';
+    $('fMailLi').hidden = !p.email;
+    $('mailLink').textContent = p.email || '';
+    if(p.email) $('mailLink').href = 'mailto:' + p.email;
+    $('fInLi').hidden = !p.linkedin;
+    if(p.linkedin){ $('inLink').href = p.linkedin; $('inLink').target = '_blank'; $('inLink').rel = 'noopener'; }
+    const href = p.linkedin || (p.email ? 'mailto:' + p.email : '#contact');
+    ['contactBtn', 'ctaBtn', 'navCta', 'aboutBtn'].forEach(id => { $(id).href = href; if(p.linkedin){ $(id).target = '_blank'; $(id).rel = 'noopener'; } });
+    $('siteBtn').hidden = false;
+  }
+  setCvButtons(real ? p : null);
+  document.querySelectorAll('.hc-glow').forEach((el, i) => el.style.setProperty('--hc-delay', (-(i * 1.7) % 9).toFixed(1) + 's'));
+  HC.refresh();
+}
+
+/* ============================================================
+   resume buttons
+   ============================================================ */
+function cvBlob(p){
+  const bin = atob(p.cvData.split(',')[1]), bytes = new Uint8Array(bin.length);
+  for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], {type: 'application/pdf'});
+}
+function setCvButtons(p){
+  const hasCv = !!(p && p.cvData);
+  const site = document.documentElement.dataset.mode === 'site';
+  $('resumeTxt').textContent = hasCv ? 'View My Resume' : 'Upload CV';
+  $('fCvLi').hidden = !hasCv;
+  if(site) $('resumeBtn').hidden = !hasCv;
+}
+$('resumeBtn').onclick = () => {
+  if(CURRENT && CURRENT.cvData) window.open(URL.createObjectURL(cvBlob(CURRENT)), '_blank');
+  else $('fileInput').click();
+};
+$('cvLink').onclick = e => {
+  e.preventDefault();
+  if(!CURRENT || !CURRENT.cvData) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(cvBlob(CURRENT));
+  a.download = slugify(CURRENT.name) + '-cv.pdf';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+};
+$('moreProj').onclick = () => {
+  const open = $('cards').classList.toggle('is-open');
+  $('moreProj').firstElementChild.textContent = open ? 'Show fewer' : 'View all projects';
+};
+
+/* ============================================================
+   upload flow
+   ============================================================ */
+function setProgress(n, pct, title){
+  [...$('steps').children].forEach((li, i) => { li.className = i < n ? 'done' : (i === n ? 'now' : ''); });
+  $('arc').style.strokeDashoffset = ARC * (1 - pct / 100);
+  $('pct').textContent = pct + '%';
+  if(title) $('modalTitle').textContent = title;
+}
+function showError(msg){
+  $('modal').classList.add('on');
+  setProgress(0, 0, 'Could not build the page');
+  $('err').textContent = msg;
+  $('modalClose').hidden = false;
+}
+const readAsDataUrl = file => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => res(''); r.readAsDataURL(file); });
+
+async function handleFile(file){
+  if(!file) return;
+  $('err').textContent = ''; $('modalClose').hidden = true;
+  if(!/pdf$/i.test(file.type) && !/\.pdf$/i.test(file.name)) return showError('Please choose a PDF file.');
+  if(file.size > 10 * 1024 * 1024) return showError('That file is over 10 MB.');
+  $('modal').classList.add('on');
+  setProgress(0, 6, 'Reading the CV');
+  try{
+    const lines = await extractPdfText(file);
+    if(lines.length < 3) return showError('No readable text found. Try a text-based PDF, not a scan.');
+    setProgress(1, 30); await wait(350);
+    const parsed = parseResume(lines);
+    /* keep the PDF in the profile so the exported site can offer it (small files only) */
+    if(file.size <= 2.5 * 1024 * 1024) parsed.cvData = await readAsDataUrl(file);
+    setProgress(2, 55); await wait(350);
+    setProgress(3, 80); await wait(350);
+    renderProfile(parsed);
+    setProgress(4, 100, 'Page ready');
+    await wait(900);
+    $('modal').classList.remove('on');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }catch(err){
+    console.error(err);
+    showError('That file could not be read.');
+  }
+}
+$('barUpload').onclick = () => $('fileInput').click();
+$('modalClose').onclick = () => $('modal').classList.remove('on');
+$('siteBtn').onclick = () => downloadSite();
+$('fileInput').addEventListener('change', e => { handleFile(e.target.files[0]); e.target.value = ''; });
+
+let dragDepth = 0;
+window.addEventListener('dragenter', e => { e.preventDefault(); dragDepth++; $('dropzone').classList.add('on'); });
+window.addEventListener('dragleave', e => { e.preventDefault(); if(--dragDepth <= 0){ dragDepth = 0; $('dropzone').classList.remove('on'); } });
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => { e.preventDefault(); dragDepth = 0; $('dropzone').classList.remove('on'); handleFile(e.dataTransfer.files[0]); });
+
+/* ============================================================
+   download: clone this page, switch it to site mode, bake the profile in
+   ============================================================ */
+function downloadSite(){
+  const doc = document.documentElement.cloneNode(true);
+  doc.dataset.mode = 'site';
+  const scripts = doc.querySelectorAll('script');
+  const last = scripts[scripts.length - 1];
+  const END = '/* end-' + 'of-page-script */';       // built in two pieces so it only matches the real comment below
+  const src = last.textContent;
+  const at = src.lastIndexOf(END);
+  last.textContent = src.slice(0, at + END.length) + '\nrenderProfile(' + JSON.stringify(CURRENT).replace(/<\//g, '<\\/') + ');\n';
+  const blob = new Blob(['<!DOCTYPE html>\n' + doc.outerHTML], {type: 'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = slugify((CURRENT || {}).name) + '.html';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(a.href);
+}
+
+/* highlight the nav link of the section on screen */
+const spy = new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    if(!en.isIntersecting) return;
+    document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('is-on', a.getAttribute('href') === '#' + en.target.id));
+  });
+}, {rootMargin: '-35% 0px -55% 0px'});
+['top', 'about', 'projects', 'experience', 'skills', 'contact'].forEach(id => spy.observe($(id)));
+
+paintIcons();
+renderProfile(parseResume(SAMPLE), {preview: true});
+/* end-of-page-script */
+</script>
+</body>
+</html>
