@@ -6,9 +6,6 @@ function escapeHtml(str){
 function initials(name){
   return (name||'').split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('') || 'P';
 }
-function slugify(name){
-  return (name||'portfolio').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || 'portfolio';
-}
 
 /* ============================================================
    YEARS-OF-EXPERIENCE CALCULATOR
@@ -53,32 +50,6 @@ function animateCounterTo(el, target, suffix){
   requestAnimationFrame(tick);
 }
 
-/* ============================================================
-   PDF PARSING
-   ============================================================ */
-if(window.pdfjsLib){
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-}
-async function extractPdfText(file){
-  const buf = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({data: buf}).promise;
-  const lines = [];
-  for(let p=1; p<=pdf.numPages; p++){
-    const page = await pdf.getPage(p);
-    const content = await page.getTextContent();
-    const items = content.items.map(it => ({str: it.str, x: it.transform[4], y: it.transform[5]}));
-    items.sort((a,b) => (b.y - a.y) || (a.x - b.x));
-    let curY = null, curLine = [];
-    items.forEach(it=>{
-      if(curY === null || Math.abs(it.y - curY) > 3){
-        if(curLine.length) lines.push(curLine.map(i=>i.str).join(' '));
-        curLine = [it]; curY = it.y;
-      } else { curLine.push(it); }
-    });
-    if(curLine.length) lines.push(curLine.map(i=>i.str).join(' '));
-  }
-  return lines.map(l => l.replace(/\s+/g,' ').trim()).filter(Boolean);
-}
 const SECTION_KEYWORDS = {
   summary: ['summary','objective','profile','about me','career objective','about'],
   experience: ['experience','work experience','employment history','professional experience','work history'],

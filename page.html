@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" data-mode="builder">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CV to Portfolio</title>
+<title>Portfolio</title>
 <link rel="icon" href="data:,">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 {{THEME_CSS}}
 </style>
@@ -18,17 +17,10 @@
    page layout: only what this page needs on top of the theme
    ============================================================ */
 html{scroll-behavior:smooth;scroll-padding-top:84px}
-[data-mode="site"] .builder-only{display:none!important}
 .ic{display:inline-block;width:22px;height:22px;flex:none}
 .ic svg{width:100%;height:100%;display:block;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .pg-wrap{width:min(1180px,100% - 48px);margin-inline:auto}
-#fileInput{display:none}
 .pg-g{color:var(--hc-teal)}
-
-/* ---------- builder dock ---------- */
-.pg-dock{position:fixed;right:18px;bottom:18px;z-index:80;display:flex;align-items:center;gap:8px;padding:8px 10px 8px 16px;border-radius:99px;
-  background:#fff;border:1px solid rgba(9,143,161,.4);box-shadow:0 16px 36px -14px rgba(16,42,77,.5);font-size:12.5px;color:var(--hc-soft)}
-.pg-dock .lbl{margin-right:4px}
 
 /* ---------- nav ---------- */
 .pg-nav{position:sticky;top:0;z-index:60;background:rgba(248,252,253,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--hc-line)}
@@ -186,27 +178,6 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
 .pg-foot .bt{margin-top:40px;padding-top:20px;border-top:1px solid var(--hc-line);font-size:12.5px;color:var(--hc-soft);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .pg-foot a[hidden],.pg-foot li[hidden]{display:none}
 
-/* ---------- progress modal + drop overlay (builder only) ---------- */
-.pg-modal{position:fixed;inset:0;z-index:100;display:none;place-items:center;background:rgba(16,42,77,.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-.pg-modal.on{display:grid}
-.pg-modal .box{width:min(380px,90vw);text-align:center;padding:30px}
-.pg-ring{position:relative;width:96px;height:96px;margin:0 auto 14px}
-.pg-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
-.pg-ring circle{fill:none;stroke-width:5}
-.pg-ring .bg{stroke:var(--hc-line)}
-.pg-ring .arc{stroke:var(--hc-teal);stroke-linecap:round;stroke-dasharray:226.2;stroke-dashoffset:226.2;transition:stroke-dashoffset .5s ease}
-.pg-ring b{position:absolute;inset:0;display:grid;place-items:center;font:600 20px var(--hc-head)}
-.pg-steps{list-style:none;margin:14px 0 0;padding:0;text-align:left;display:inline-block}
-.pg-steps li{position:relative;padding:5px 0 5px 24px;font-size:13px;color:var(--hc-soft)}
-.pg-steps li::before{content:"";position:absolute;left:0;top:9px;width:11px;height:11px;border-radius:50%;border:2px solid var(--hc-line)}
-.pg-steps li.done{color:var(--hc-ink)}
-.pg-steps li.done::before{background:var(--hc-teal);border-color:var(--hc-teal)}
-.pg-steps li.now::before{border-color:var(--hc-teal);animation:pg-beat 1s ease-in-out infinite}
-@keyframes pg-beat{50%{box-shadow:0 0 0 5px rgba(9,143,161,.25)}}
-.pg-err{color:#c0392b;font-size:13px;margin-top:8px;min-height:18px}
-.pg-drop{position:fixed;inset:14px;z-index:90;display:none;place-items:center;border:2px dashed var(--hc-teal);border-radius:22px;background:rgba(237,246,252,.94);font:600 26px var(--hc-head);pointer-events:none}
-.pg-drop.on{display:grid}
-
 /* ---------- smaller screens ---------- */
 @media (max-width:1040px){
   .pg-links{display:none}
@@ -226,20 +197,11 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
   .pg-prof,.pg-bar{grid-template-columns:1fr 1fr}
   .pg-pi::before,.pg-stat::before{display:none!important}
   .pg-cta2{padding:30px 24px}
-  .pg-dock .lbl{display:none}
   .pg-fgrid{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body class="hc" data-hc-bg>
-
-<!-- builder-only dock: hidden in the downloaded site -->
-<div class="pg-dock builder-only">
-  <span class="lbl">CV builder</span>
-  <button class="hc-btn hc-btn-solid hc-btn-sm" id="barUpload" type="button">Upload CV</button>
-  <button class="hc-btn hc-btn-line hc-btn-sm" id="siteBtn" type="button" hidden>Download site</button>
-  <input type="file" id="fileInput" accept="application/pdf,.pdf">
-</div>
 
 <header class="pg-nav">
   <div class="pg-wrap">
@@ -263,7 +225,7 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
       <h1 id="heroTitle" data-hc-words>Hi, I’m Name <br><span class="hc-wipe pg-g">Healthcare Product Designer</span></h1>
       <p class="sum hc-reveal" id="heroSum"></p>
       <div class="pg-cta hc-reveal">
-        <button class="hc-btn hc-btn-solid" id="resumeBtn" type="button"><span id="resumeTxt">Upload CV</span> <span class="ic" data-ic="arrow" style="width:16px;height:16px"></span></button>
+        <a class="hc-btn hc-btn-solid" href="#projects">View my work <span class="ic" data-ic="arrow" style="width:16px;height:16px"></span></a>
         <a class="hc-btn hc-btn-line" id="contactBtn" href="#contact">Get in touch</a>
       </div>
       <div class="pg-exp hc-reveal">
@@ -353,41 +315,25 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
       <div><h5>Contact</h5><ul>
         <li id="fLoc"></li>
         <li id="fMailLi" hidden><a id="mailLink" href="#top"></a></li>
-        <li id="fInLi" hidden><a id="inLink" href="#top">LinkedIn</a></li>
-        <li id="fCvLi" hidden><a id="cvLink" href="#top">Download CV</a></li></ul></div>
+        <li id="fInLi" hidden><a id="inLink" href="#top">LinkedIn</a></li></ul></div>
     </div>
     <div class="bt"><span id="footName">&copy; 2026 Name</span><span>Built from a CV</span></div>
   </div>
 </footer>
 
-<!-- progress while a CV is being read (builder only) -->
-<div class="pg-modal builder-only" id="modal" role="dialog" aria-live="polite">
-  <div class="hc-card box">
-    <div class="pg-ring"><svg viewBox="0 0 80 80"><circle class="bg" cx="40" cy="40" r="36"/><circle class="arc" id="arc" cx="40" cy="40" r="36"/></svg><b id="pct">0%</b></div>
-    <h3 id="modalTitle" style="margin:0">Reading the CV</h3>
-    <ul class="pg-steps" id="steps"><li>Extracting experience</li><li>Picking out skills</li><li>Finding projects</li><li>Building the page</li></ul>
-    <div class="pg-err" id="err"></div>
-    <button class="hc-btn hc-btn-line hc-btn-sm" id="modalClose" type="button" hidden style="margin-top:8px">Close</button>
-  </div>
-</div>
-<div class="pg-drop builder-only" id="dropzone">Drop the CV to build the page</div>
-
 <script>
 {{HELPERS}}
 
 /* ============================================================
-   page script: CV in, portfolio out
+   page script: fills the page from the sample data below
    ============================================================ */
 const $ = id => document.getElementById(id);
-const wait = ms => new Promise(r => setTimeout(r, ms));
-const ARC = 226.2;                  // circumference of the r=36 progress ring
 const NOW_YEAR = new Date().getFullYear();
-let CURRENT = null;                 // set once a real CV has been processed
 
 /* the six therapeutic-area photos cut from the design (project cards cycle through them) */
 const PHOTOS = ['{{A1}}', '{{A2}}', '{{A3}}', '{{A4}}', '{{A5}}', '{{A6}}'];
 
-/* fictional CV shown before anything is uploaded; it goes through the same parser as a real PDF */
+/* placeholder content: edit these lines to change the text on the page */
 const SAMPLE = [
   'Name', 'Healthcare Product Designer', 'Pune, India', 'name@example.com', 'linkedin.com/in/name',
   'Summary',
@@ -463,10 +409,7 @@ const NOT_LISTED = 'Not listed';
 /* ============================================================
    render
    ============================================================ */
-function renderProfile(p, opts){
-  opts = opts || {};
-  const real = !opts.preview;
-  if(real) CURRENT = p;
+function renderProfile(p){
   const y = yearsLabel(computeYearsOfExperience(p.experience));
   const name = p.name || 'Name';
   const role = p.headline || (p.experience[0] && p.experience[0].title) || 'Healthcare Professional';
@@ -540,128 +483,22 @@ function renderProfile(p, opts){
   /* contact */
   $('fLoc').textContent = p.location || '';
   $('fLoc').hidden = !p.location;
-  if(real){
-    document.title = name + ' | Portfolio';
-    $('fMailLi').hidden = !p.email;
-    $('mailLink').textContent = p.email || '';
-    if(p.email) $('mailLink').href = 'mailto:' + p.email;
-    $('fInLi').hidden = !p.linkedin;
-    if(p.linkedin){ $('inLink').href = p.linkedin; $('inLink').target = '_blank'; $('inLink').rel = 'noopener'; }
-    const href = p.linkedin || (p.email ? 'mailto:' + p.email : '#contact');
-    ['contactBtn', 'ctaBtn', 'navCta', 'aboutBtn'].forEach(id => { $(id).href = href; if(p.linkedin){ $(id).target = '_blank'; $(id).rel = 'noopener'; } });
-    $('siteBtn').hidden = false;
-  }
-  setCvButtons(real ? p : null);
+  document.title = name + ' | Portfolio';
+  $('fMailLi').hidden = !p.email;
+  $('mailLink').textContent = p.email || '';
+  if(p.email) $('mailLink').href = 'mailto:' + p.email;
+  $('fInLi').hidden = !p.linkedin;
+  if(p.linkedin){ $('inLink').href = p.linkedin; $('inLink').target = '_blank'; $('inLink').rel = 'noopener'; }
+  const href = p.linkedin || (p.email ? 'mailto:' + p.email : '#contact');
+  ['contactBtn', 'ctaBtn', 'navCta', 'aboutBtn'].forEach(id => { $(id).href = href; if(p.linkedin){ $(id).target = '_blank'; $(id).rel = 'noopener'; } });
   document.querySelectorAll('.hc-glow').forEach((el, i) => el.style.setProperty('--hc-delay', (-(i * 1.7) % 9).toFixed(1) + 's'));
   HC.refresh();
 }
 
-/* ============================================================
-   resume buttons
-   ============================================================ */
-function cvBlob(p){
-  const bin = atob(p.cvData.split(',')[1]), bytes = new Uint8Array(bin.length);
-  for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return new Blob([bytes], {type: 'application/pdf'});
-}
-function setCvButtons(p){
-  const hasCv = !!(p && p.cvData);
-  const site = document.documentElement.dataset.mode === 'site';
-  $('resumeTxt').textContent = hasCv ? 'View My Resume' : 'Upload CV';
-  $('fCvLi').hidden = !hasCv;
-  if(site) $('resumeBtn').hidden = !hasCv;
-}
-$('resumeBtn').onclick = () => {
-  if(CURRENT && CURRENT.cvData) window.open(URL.createObjectURL(cvBlob(CURRENT)), '_blank');
-  else $('fileInput').click();
-};
-$('cvLink').onclick = e => {
-  e.preventDefault();
-  if(!CURRENT || !CURRENT.cvData) return;
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(cvBlob(CURRENT));
-  a.download = slugify(CURRENT.name) + '-cv.pdf';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-};
 $('moreProj').onclick = () => {
   const open = $('cards').classList.toggle('is-open');
   $('moreProj').firstElementChild.textContent = open ? 'Show fewer' : 'View all projects';
 };
-
-/* ============================================================
-   upload flow
-   ============================================================ */
-function setProgress(n, pct, title){
-  [...$('steps').children].forEach((li, i) => { li.className = i < n ? 'done' : (i === n ? 'now' : ''); });
-  $('arc').style.strokeDashoffset = ARC * (1 - pct / 100);
-  $('pct').textContent = pct + '%';
-  if(title) $('modalTitle').textContent = title;
-}
-function showError(msg){
-  $('modal').classList.add('on');
-  setProgress(0, 0, 'Could not build the page');
-  $('err').textContent = msg;
-  $('modalClose').hidden = false;
-}
-const readAsDataUrl = file => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => res(''); r.readAsDataURL(file); });
-
-async function handleFile(file){
-  if(!file) return;
-  $('err').textContent = ''; $('modalClose').hidden = true;
-  if(!/pdf$/i.test(file.type) && !/\.pdf$/i.test(file.name)) return showError('Please choose a PDF file.');
-  if(file.size > 10 * 1024 * 1024) return showError('That file is over 10 MB.');
-  $('modal').classList.add('on');
-  setProgress(0, 6, 'Reading the CV');
-  try{
-    const lines = await extractPdfText(file);
-    if(lines.length < 3) return showError('No readable text found. Try a text-based PDF, not a scan.');
-    setProgress(1, 30); await wait(350);
-    const parsed = parseResume(lines);
-    /* keep the PDF in the profile so the exported site can offer it (small files only) */
-    if(file.size <= 2.5 * 1024 * 1024) parsed.cvData = await readAsDataUrl(file);
-    setProgress(2, 55); await wait(350);
-    setProgress(3, 80); await wait(350);
-    renderProfile(parsed);
-    setProgress(4, 100, 'Page ready');
-    await wait(900);
-    $('modal').classList.remove('on');
-    window.scrollTo({top: 0, behavior: 'smooth'});
-  }catch(err){
-    console.error(err);
-    showError('That file could not be read.');
-  }
-}
-$('barUpload').onclick = () => $('fileInput').click();
-$('modalClose').onclick = () => $('modal').classList.remove('on');
-$('siteBtn').onclick = () => downloadSite();
-$('fileInput').addEventListener('change', e => { handleFile(e.target.files[0]); e.target.value = ''; });
-
-let dragDepth = 0;
-window.addEventListener('dragenter', e => { e.preventDefault(); dragDepth++; $('dropzone').classList.add('on'); });
-window.addEventListener('dragleave', e => { e.preventDefault(); if(--dragDepth <= 0){ dragDepth = 0; $('dropzone').classList.remove('on'); } });
-window.addEventListener('dragover', e => e.preventDefault());
-window.addEventListener('drop', e => { e.preventDefault(); dragDepth = 0; $('dropzone').classList.remove('on'); handleFile(e.dataTransfer.files[0]); });
-
-/* ============================================================
-   download: clone this page, switch it to site mode, bake the profile in
-   ============================================================ */
-function downloadSite(){
-  const doc = document.documentElement.cloneNode(true);
-  doc.dataset.mode = 'site';
-  const scripts = doc.querySelectorAll('script');
-  const last = scripts[scripts.length - 1];
-  const END = '/* end-' + 'of-page-script */';       // built in two pieces so it only matches the real comment below
-  const src = last.textContent;
-  const at = src.lastIndexOf(END);
-  last.textContent = src.slice(0, at + END.length) + '\nrenderProfile(' + JSON.stringify(CURRENT).replace(/<\//g, '<\\/') + ');\n';
-  const blob = new Blob(['<!DOCTYPE html>\n' + doc.outerHTML], {type: 'text/html'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = slugify((CURRENT || {}).name) + '.html';
-  document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(a.href);
-}
 
 /* highlight the nav link of the section on screen */
 const spy = new IntersectionObserver(entries => {
@@ -673,7 +510,7 @@ const spy = new IntersectionObserver(entries => {
 ['top', 'about', 'projects', 'experience', 'skills', 'contact'].forEach(id => spy.observe($(id)));
 
 paintIcons();
-renderProfile(parseResume(SAMPLE), {preview: true});
+renderProfile(parseResume(SAMPLE));
 /* end-of-page-script */
 </script>
 </body>
